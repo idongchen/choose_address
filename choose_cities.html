@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: 微软雅黑;
+    }
+
+  </style>
+  <script>
+    window.onload = function () {
+    	var oBtn = document.getElementById("btn1");
+    	var xhr = null;
+    	var data;
+    	var oSlt1 = document.getElementById("slt1");
+    	var oSlt2 = document.getElementById("slt2");
+    	var oSlt3 = document.getElementById("slt3");
+    	
+    	function shi(arr,obj){
+    		for(var i = 1;i<arr.length;i++){
+    			var country =document.createElement('option');
+    				country.innerHTML=arr[i].name;
+    			obj.appendChild(country);
+    		}
+    	}
+    	//ajax有4步
+    	//第一步  创建XHR对象
+    	if(window.XMLHttpRequest){
+    		xhr = new XMLHttpRequest();
+    	}else{
+    		xhr = new ActiveXObject("Msxml2.XMLHTTP");
+    	}
+    		
+    		//第二步  .open配置XHR
+    		xhr.open("GET","data/citys.json",true);
+    		
+    		//第三步  状态监测，成功之后再  会把请求的URL上的内容返回给XHR对象的 responseText属性
+    		xhr.onreadystatechange = function (){
+    			if(xhr.readyState == 4){
+    				if(xhr.status == 200){
+    					//console.log(JSON.parse(xhr.responseText));
+    					data = JSON.parse(xhr.responseText);
+    					for(var i = 1;i<data.length;i++){
+    						//console.log(data[i].name)  //出全国的省
+    						var opt1 = document.createElement('option');
+    						opt1.innerHTML = data[i].name;
+    						oSlt1.appendChild(opt1);
+    					}
+    					oSlt1.onchange = function (){
+    						oSlt2.innerHTML = '<option>请选择市</option>';
+    						for(var i=1;i<data.length;i++){
+    							if(data[i].name == oSlt1.value){
+    								//console.log(data[i].sub); //这是市的数组
+    								shi(data[i].sub,oSlt2);
+    								
+    									//做最第三层
+			    					oSlt2.onchange = function (){
+			    						oSlt3.innerHTML = '<option>请选择市</option>';
+			    							for(var j = 1;j<data[i].sub.length;j++){
+			    								if(data[i].sub[j].sub){//直辖市不存在sub[j].sub,所以做个判断，不为直辖市存在县才进行
+			    									if(data[i].sub[j].name == oSlt2.value){
+			    										shi(data[i].sub[j].sub,oSlt3);
+			    									}
+			    								}
+			    							}
+			    					}
+    								//跳出循环
+    								break;
+    							}
+    						}
+    						
+    					
+    					}
+    					
+    				}
+    			}
+    		}
+    	
+    	//第四步  正式向服务器发送请求
+    	oBtn.onclick = function (){
+    		xhr.send();
+    	}
+    };
+  </script>
+</head>
+<body>
+	<input type="button" id="btn1" value="加载ajax" />
+	<select id="slt1" >
+		<option value="">请选择省</option>
+	</select>
+	<select id="slt2">
+		<option>请选择市</option>
+	</select>
+	<select id="slt3">
+		<option value="">请选择县</option>
+	</select>
+</body>
+</html>
